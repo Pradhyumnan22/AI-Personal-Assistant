@@ -6,7 +6,7 @@ from app.main import app
 
 class FakeChatService:
     async def chat(self, content: str, conversation_id: str | None = None):
-        return conversation_id or "conversation-1", f"Reply to: {content}"
+        return conversation_id or "conversation-1", f"Reply to: {content}", []
 
 
 def test_chat_endpoint(client):
@@ -18,6 +18,7 @@ def test_chat_endpoint(client):
     assert response.json() == {
         "conversation_id": "conversation-1",
         "message": "Reply to: Hello",
+        "sources": [],
     }
 
 
@@ -41,3 +42,14 @@ def test_note_crud(client):
 
     deleted = client.delete(f"/api/v1/notes/{note_id}")
     assert deleted.status_code == 204
+
+
+def test_upload_text_document(client):
+    response = client.post(
+        "/api/v1/documents",
+        files={"file": ("study-plan.txt", b"Review LangGraph every Friday", "text/plain")},
+    )
+
+    assert response.status_code == 201
+    assert response.json()["title"] == "study-plan"
+    assert response.json()["content"] == "Review LangGraph every Friday"

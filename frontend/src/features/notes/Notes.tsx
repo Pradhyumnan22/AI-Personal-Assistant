@@ -54,7 +54,7 @@ export function Notes({ onOpenChat }: NotesProps) {
         : await api.createNote(title.trim(), content.trim());
       await refresh(note.id);
       setSelectedId(note.id);
-      setStatus("Note saved. Index it to make it available to the assistant.");
+      setStatus("Note saved and indexed for the assistant.");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to save note");
     } finally {
@@ -92,6 +92,23 @@ export function Notes({ onOpenChat }: NotesProps) {
     }
   }
 
+  async function uploadDocument(file?: File) {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    setStatus("");
+    try {
+      const note = await api.uploadDocument(file);
+      await refresh(note.id);
+      selectNote(note);
+      setStatus("Document uploaded and indexed successfully.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="shell">
       <aside>
@@ -101,6 +118,18 @@ export function Notes({ onOpenChat }: NotesProps) {
           <button className="active">Notes</button>
         </div>
         <button className="new-chat" onClick={newNote}>+ New note</button>
+        <label className="upload-button">
+          Upload PDF or text
+          <input
+            accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
+            disabled={busy}
+            type="file"
+            onChange={(event) => {
+              uploadDocument(event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
+        </label>
         <nav aria-label="Notes">
           {notes.map((note) => (
             <button
@@ -116,7 +145,7 @@ export function Notes({ onOpenChat }: NotesProps) {
       <section className="notes-page">
         <header>
           <h1>{selectedId ? "Edit note" : "New note"}</h1>
-          <p>Save knowledge, then index it for retrieval in chat.</p>
+          <p>Notes are automatically indexed for retrieval when saved.</p>
         </header>
         <form className="note-editor" onSubmit={save}>
           <label>

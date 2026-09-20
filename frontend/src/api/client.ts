@@ -5,6 +5,13 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   created_at?: string;
+  sources?: Source[];
+}
+
+export interface Source {
+  note_id: string;
+  title: string;
+  excerpt: string;
 }
 
 export interface Conversation {
@@ -23,9 +30,13 @@ export interface Note {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...options?.headers,
+    },
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
@@ -40,7 +51,7 @@ export const api = {
   messages: (id: string) =>
     request<Message[]>(`/api/v1/conversations/${id}/messages`),
   chat: (message: string, conversationId?: string) =>
-    request<{ conversation_id: string; message: string }>("/api/v1/chat", {
+    request<{ conversation_id: string; message: string; sources: Source[] }>("/api/v1/chat", {
       method: "POST",
       body: JSON.stringify({ message, conversation_id: conversationId }),
     }),
@@ -59,4 +70,9 @@ export const api = {
     request<void>(`/api/v1/notes/${id}`, { method: "DELETE" }),
   indexNote: (id: string) =>
     request<void>(`/api/v1/notes/${id}/index`, { method: "POST" }),
+  uploadDocument: (file: File) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request<Note>("/api/v1/documents", { method: "POST", body });
+  },
 };

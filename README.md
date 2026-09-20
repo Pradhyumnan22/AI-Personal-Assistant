@@ -7,7 +7,9 @@ React, SQLite, and a small replaceable RAG layer.
 
 - Persistent conversations and messages
 - Minimal LangGraph workflow backed by OpenAI
-- Notes CRUD and semantic retrieval
+- Notes CRUD with automatic semantic indexing
+- PDF, text, and Markdown document uploads
+- Retrieved source citations in chat responses
 - Responsive React chat client
 - Optional API-key protection, request IDs, tests, CI, and deployment manifests
 
@@ -63,9 +65,11 @@ Open http://localhost:5173. API docs are at http://127.0.0.1:8000/docs.
 - `GET|POST /api/v1/notes`
 - `PUT|DELETE /api/v1/notes/{id}`
 - `POST /api/v1/notes/{id}/index`
+- `POST /api/v1/documents` (PDF, TXT, or Markdown; 10 MB maximum)
 - `GET /health`
 
-Create a note and call its `/index` endpoint before expecting it in RAG results.
+Notes and uploaded documents are indexed automatically. The explicit `/index`
+endpoint can be used to rebuild an existing note's embeddings.
 If `API_KEY` is configured, send it as the `X-API-Key` header.
 
 ## Quality checks

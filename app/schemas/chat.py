@@ -10,9 +10,16 @@ class ChatRequest(BaseModel):
     conversation_id: str | None = None
 
 
+class SourceResponse(BaseModel):
+    note_id: str
+    title: str
+    excerpt: str
+
+
 class ChatResponse(BaseModel):
     conversation_id: str
     message: str
+    sources: list[SourceResponse] = Field(default_factory=list)
 
 
 class MessageResponse(BaseModel):

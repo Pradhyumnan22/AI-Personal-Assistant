@@ -2,11 +2,20 @@
 
 import json
 import math
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
+from app.db.models import Note
 from app.db.repositories import NoteRepository
 from app.llm import LLMClient
+
+
+@dataclass(frozen=True)
+class RetrievedChunk:
+    note_id: str
+    title: str
+    content: str
 
 
 def chunk_text(text: str, size: int = 800, overlap: int = 100) -> list[str]:
@@ -41,7 +50,7 @@ class LocalRetriever:
             [(chunk, json.dumps(embedding)) for chunk, embedding in zip(chunks, embeddings)],
         )
 
-    async def search(self, query: str, limit: int = 3) -> list[str]:
+    async def search(self, query: str, limit: int = 3) -> list[RetrievedChunk]:
         chunks = [chunk for chunk in self.repository.chunks() if chunk.embedding]
         if not chunks:
             return []
@@ -53,4 +62,13 @@ class LocalRetriever:
             ),
             reverse=True,
         )
-        return [chunk.content for chunk in ranked[:limit]]
+        results = []
+        for chunk in ranked[:limit]:
+            note = self.repository.session.get(Note, chunk.note_id)
+            if note:
+                results.append(
+                    RetrievedChunk(
+                        note_id=note.id, title=note.title, content=chunk.content
+                    )
+                )
+        return results

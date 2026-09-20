@@ -43,7 +43,11 @@ export function Chat({ onOpenNotes }: ChatProps) {
       setConversationId(response.conversation_id);
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: response.message },
+        {
+          role: "assistant",
+          content: response.message,
+          sources: response.sources,
+        },
       ]);
       refreshConversations();
     } catch (reason) {
@@ -95,6 +99,17 @@ export function Chat({ onOpenNotes }: ChatProps) {
             <article className={message.role} key={message.id ?? index}>
               <strong>{message.role === "user" ? "You" : "Assistant"}</strong>
               <p>{message.content}</p>
+              {message.sources && message.sources.length > 0 && (
+                <div className="sources">
+                  <span>Sources</span>
+                  {message.sources.map((source) => (
+                    <details key={`${source.note_id}-${source.excerpt}`}>
+                      <summary>{source.title}</summary>
+                      <p>{source.excerpt}</p>
+                    </details>
+                  ))}
+                </div>
+              )}
             </article>
           ))}
           {busy && <article className="assistant">Thinking…</article>}

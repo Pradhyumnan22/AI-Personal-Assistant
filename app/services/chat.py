@@ -38,7 +38,10 @@ class ChatService:
                 0,
                 {
                     "role": "system",
-                    "content": "Relevant saved notes:\n\n" + "\n\n---\n\n".join(context),
+                    "content": "Relevant saved knowledge:\n\n"
+                    + "\n\n---\n\n".join(
+                        f"[Source: {item.title}]\n{item.content}" for item in context
+                    ),
                 },
             )
         result = await self.graph.ainvoke(
@@ -49,4 +52,4 @@ class ChatService:
         )
         answer = result["response"]
         self.repository.add_message(conversation.id, "assistant", answer)
-        return conversation.id, answer
+        return conversation.id, answer, context

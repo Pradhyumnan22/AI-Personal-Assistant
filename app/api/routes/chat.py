@@ -11,6 +11,7 @@ from app.schemas.chat import (
     ChatResponse,
     ConversationResponse,
     MessageResponse,
+    SourceResponse,
 )
 from app.services.chat import ChatService
 from app.core.security import verify_api_key
@@ -24,7 +25,7 @@ async def chat(
     service: Annotated[ChatService, Depends(get_chat_service)],
 ) -> ChatResponse:
     try:
-        conversation_id, answer = await service.chat(
+        conversation_id, answer, sources = await service.chat(
             request.message, request.conversation_id
         )
     except LookupError as exc:
@@ -33,7 +34,18 @@ async def chat(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
         ) from exc
-    return ChatResponse(conversation_id=conversation_id, message=answer)
+    return ChatResponse(
+        conversation_id=conversation_id,
+        message=answer,
+        sources=[
+            SourceResponse(
+                note_id=source.note_id,
+                title=source.title,
+                excerpt=source.content[:240],
+            )
+            for source in sources
+        ],
+    )
 
 
 @router.get("/conversations", response_model=list[ConversationResponse])
