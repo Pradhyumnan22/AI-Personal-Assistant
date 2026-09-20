@@ -1,0 +1,43 @@
+"""Integration tests for the main API use cases."""
+
+from app.api.dependencies import get_chat_service
+from app.main import app
+
+
+class FakeChatService:
+    async def chat(self, content: str, conversation_id: str | None = None):
+        return conversation_id or "conversation-1", f"Reply to: {content}"
+
+
+def test_chat_endpoint(client):
+    app.dependency_overrides[get_chat_service] = lambda: FakeChatService()
+
+    response = client.post("/api/v1/chat", json={"message": "Hello"})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "conversation_id": "conversation-1",
+        "message": "Reply to: Hello",
+    }
+
+
+def test_note_crud(client):
+    created = client.post(
+        "/api/v1/notes", json={"title": "Portfolio", "content": "Build an assistant"}
+    )
+    assert created.status_code == 201
+    note_id = created.json()["id"]
+
+    listed = client.get("/api/v1/notes")
+    assert listed.status_code == 200
+    assert listed.json()[0]["title"] == "Portfolio"
+
+    updated = client.put(
+        f"/api/v1/notes/{note_id}",
+        json={"title": "Updated", "content": "Ship the assistant"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["title"] == "Updated"
+
+    deleted = client.delete(f"/api/v1/notes/{note_id}")
+    assert deleted.status_code == 204
