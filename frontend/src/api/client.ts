@@ -29,6 +29,15 @@ export interface Note {
   updated_at: string;
 }
 
+export interface Task {
+  id: string;
+  title: string;
+  due_at: string | null;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const isFormData = options?.body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
@@ -75,4 +84,23 @@ export const api = {
     body.append("file", file);
     return request<Note>("/api/v1/documents", { method: "POST", body });
   },
+  tasks: () => request<Task[]>("/api/v1/tasks"),
+  createTask: (title: string, dueAt?: string) =>
+    request<Task>("/api/v1/tasks", {
+      method: "POST",
+      body: JSON.stringify({ title, due_at: dueAt || null }),
+    }),
+  updateTask: (task: Task) =>
+    request<Task>(`/api/v1/tasks/${task.id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        title: task.title,
+        due_at: task.due_at,
+        completed: task.completed,
+      }),
+    }),
+  completeTask: (id: string) =>
+    request<Task>(`/api/v1/tasks/${id}/complete`, { method: "POST" }),
+  deleteTask: (id: string) =>
+    request<void>(`/api/v1/tasks/${id}`, { method: "DELETE" }),
 };

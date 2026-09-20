@@ -53,3 +53,23 @@ def test_upload_text_document(client):
     assert response.status_code == 201
     assert response.json()["title"] == "study-plan"
     assert response.json()["content"] == "Review LangGraph every Friday"
+
+
+def test_task_crud(client):
+    created = client.post(
+        "/api/v1/tasks",
+        json={"title": "Submit portfolio", "due_at": "2026-10-01T09:00:00Z"},
+    )
+    assert created.status_code == 201
+    task_id = created.json()["id"]
+
+    completed = client.post(f"/api/v1/tasks/{task_id}/complete")
+    assert completed.status_code == 200
+    assert completed.json()["completed"] is True
+
+    listed = client.get("/api/v1/tasks")
+    assert listed.status_code == 200
+    assert listed.json()[0]["title"] == "Submit portfolio"
+
+    deleted = client.delete(f"/api/v1/tasks/{task_id}")
+    assert deleted.status_code == 204

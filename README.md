@@ -10,6 +10,7 @@ React, SQLite, and a small replaceable RAG layer.
 - Notes CRUD with automatic semantic indexing
 - PDF, text, and Markdown document uploads
 - Retrieved source citations in chat responses
+- Persistent tasks and reminders with LangGraph tool calling
 - Responsive React chat client
 - Optional API-key protection, request IDs, tests, CI, and deployment manifests
 
@@ -66,6 +67,9 @@ Open http://localhost:5173. API docs are at http://127.0.0.1:8000/docs.
 - `PUT|DELETE /api/v1/notes/{id}`
 - `POST /api/v1/notes/{id}/index`
 - `POST /api/v1/documents` (PDF, TXT, or Markdown; 10 MB maximum)
+- `GET|POST /api/v1/tasks`
+- `PUT|DELETE /api/v1/tasks/{id}`
+- `POST /api/v1/tasks/{id}/complete`
 - `GET /health`
 
 Notes and uploaded documents are indexed automatically. The explicit `/index`

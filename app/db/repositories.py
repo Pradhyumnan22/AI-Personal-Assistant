@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Conversation, DocumentChunk, Message, Note
+from app.db.models import Conversation, DocumentChunk, Message, Note, Task
 
 
 class ConversationRepository:
@@ -82,3 +84,41 @@ class NoteRepository:
 
     def chunks(self) -> list[DocumentChunk]:
         return list(self.session.scalars(select(DocumentChunk)))
+
+
+class TaskRepository:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create(self, title: str, due_at: datetime | None = None) -> Task:
+        task = Task(title=title, due_at=due_at)
+        self.session.add(task)
+        self.session.commit()
+        return task
+
+    def list(self, include_completed: bool = True) -> list[Task]:
+        statement = select(Task).order_by(Task.completed, Task.due_at, Task.created_at)
+        if not include_completed:
+            statement = statement.where(Task.completed.is_(False))
+        return list(self.session.scalars(statement))
+
+    def get(self, task_id: str) -> Task | None:
+        return self.session.get(Task, task_id)
+
+    def update(
+        self, task: Task, title: str, due_at: datetime | None, completed: bool
+    ) -> Task:
+        task.title = title
+        task.due_at = due_at
+        task.completed = completed
+        self.session.commit()
+        return task
+
+    def complete(self, task: Task) -> Task:
+        task.completed = True
+        self.session.commit()
+        return task
+
+    def delete(self, task: Task) -> None:
+        self.session.delete(task)
+        self.session.commit()

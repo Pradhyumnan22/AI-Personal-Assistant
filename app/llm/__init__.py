@@ -1,5 +1,5 @@
 """LLM client integrations."""
 
-from app.llm.client import LLMClient, OpenAIClient
+from app.llm.client import LLMClient, OpenAIClient, ToolCall, ToolDecision
 
-__all__ = ["LLMClient", "OpenAIClient"]
+__all__ = ["LLMClient", "OpenAIClient", "ToolCall", "ToolDecision"]

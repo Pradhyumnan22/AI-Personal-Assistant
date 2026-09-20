@@ -3,9 +3,10 @@ import { api, Note } from "../../api/client";
 
 interface NotesProps {
   onOpenChat: () => void;
+  onOpenTasks: () => void;
 }
 
-export function Notes({ onOpenChat }: NotesProps) {
+export function Notes({ onOpenChat, onOpenTasks }: NotesProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
   const [title, setTitle] = useState("");
@@ -113,9 +114,10 @@ export function Notes({ onOpenChat }: NotesProps) {
     <main className="shell">
       <aside>
         <div className="brand">Personal Assistant</div>
-        <div className="section-switcher">
+        <div className="section-switcher three">
           <button onClick={onOpenChat}>Chat</button>
           <button className="active">Notes</button>
+          <button onClick={onOpenTasks}>Tasks</button>
         </div>
         <button className="new-chat" onClick={newNote}>+ New note</button>
         <label className="upload-button">

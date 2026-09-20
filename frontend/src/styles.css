@@ -13,6 +13,7 @@ aside { background: #111820; border-right: 1px solid #28313d; padding: 24px 16px
 .brand { font-size: 18px; font-weight: 700; margin: 0 8px 24px; }
 button { cursor: pointer; }
 .section-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px; }
+.section-switcher.three { grid-template-columns: repeat(3, 1fr); }
 .section-switcher button {
   background: transparent; border: 1px solid #33404e; border-radius: 9px;
   color: #9ba9b8; padding: 9px;
@@ -76,10 +77,44 @@ form button:disabled { cursor: default; opacity: .45; }
 .note-actions button:nth-child(2) { background: #263546; border-color: #405266; }
 .note-actions button.danger { background: transparent; border-color: #8d3b45; color: #ff9da6; margin-left: auto; }
 .note-actions button:disabled { cursor: default; opacity: .45; }
+.tasks-page {
+  display: flex; flex-direction: column; height: 100vh; max-width: 900px;
+  margin: auto; padding: 32px; width: 100%;
+}
+.task-form {
+  align-items: center; background: #151d26; border: 1px solid #344252;
+  border-radius: 14px; display: grid; gap: 10px;
+  grid-template-columns: 1fr auto auto; margin-top: 24px; padding: 10px;
+}
+.task-form input {
+  background: transparent; border: 0; color: inherit; min-width: 0;
+  outline: 0; padding: 10px;
+}
+.task-form input[type="datetime-local"] { color-scheme: dark; }
+.task-form button {
+  background: #3b82f6; border: 0; border-radius: 10px; color: white; padding: 10px 18px;
+}
+.task-form button:disabled { opacity: .45; }
+.task-list { display: grid; gap: 10px; margin-top: 24px; overflow-y: auto; }
+.task-row {
+  align-items: center; background: #151d26; border: 1px solid #2e3b49;
+  border-radius: 12px; display: grid; gap: 12px;
+  grid-template-columns: auto 1fr auto; padding: 14px;
+}
+.task-row > div { display: grid; gap: 5px; }
+.task-row span { color: #91a1b1; font-size: 13px; }
+.task-row.completed strong { color: #7e8a97; text-decoration: line-through; }
+.task-check {
+  background: transparent; border: 1px solid #526476; border-radius: 7px;
+  color: #8de1a8; height: 25px; padding: 0; width: 25px;
+}
+.task-delete { background: transparent; border: 0; color: #ff9da6; padding: 8px; }
 @media (max-width: 700px) {
   .shell { display: block; }
   aside { display: none; }
   .chat { height: 100vh; padding: 20px 14px; }
   .notes-page { height: 100vh; padding: 20px 14px; }
+  .tasks-page { height: 100vh; padding: 20px 14px; }
+  .task-form { grid-template-columns: 1fr; }
   article { max-width: 92%; }
 }

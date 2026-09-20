@@ -7,13 +7,14 @@ from app.core.config import settings
 from app.db.repositories import ConversationRepository
 from app.llm import LLMClient, OpenAIClient
 from app.rag import LocalRetriever
+from app.tools import TaskToolbox
 
 
 class ChatService:
     def __init__(self, session: Session, llm: LLMClient | None = None):
         self.repository = ConversationRepository(session)
         self.llm = llm or OpenAIClient()
-        self.graph = build_assistant_graph(self.llm)
+        self.graph = build_assistant_graph(self.llm, TaskToolbox(session))
         self.retriever = LocalRetriever(session, self.llm)
 
     async def chat(self, content: str, conversation_id: str | None = None):

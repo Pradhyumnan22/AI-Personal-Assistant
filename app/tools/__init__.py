@@ -1,1 +1,5 @@
-"""Agent tools (calendar, email, search, and similar). Implementation will be added later."""
+"""Agent tool integrations."""
+
+from app.tools.tasks import TaskToolbox
+
+__all__ = ["TaskToolbox"]

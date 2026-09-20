@@ -1,10 +1,12 @@
 """Minimal LangGraph assistant workflow."""
 
 from typing import TypedDict
+from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
 
-from app.llm import LLMClient
+from app.llm import LLMClient, ToolCall
+from app.tools import TaskToolbox
 
 SYSTEM_PROMPT = (
     "You are a concise, reliable personal assistant. Use supplied context when "
@@ -12,18 +14,60 @@ SYSTEM_PROMPT = (
 )
 
 
-class AgentState(TypedDict):
+class AgentState(TypedDict, total=False):
     messages: list[dict[str, str]]
     response: str
+    tool_calls: list[ToolCall]
+    tool_results: list[str]
 
 
-def build_assistant_graph(llm: LLMClient):
-    async def respond(state: AgentState) -> dict[str, str]:
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}, *state["messages"]]
+def build_assistant_graph(llm: LLMClient, toolbox: TaskToolbox | None = None):
+    def system_message() -> dict[str, str]:
+        return {
+            "role": "system",
+            "content": (
+                f"{SYSTEM_PROMPT}\nCurrent UTC time: "
+                f"{datetime.now(timezone.utc).isoformat()}. "
+                "Use task tools whenever the user asks to create, list, complete, "
+                "or delete tasks or reminders."
+            ),
+        }
+
+    async def decide(state: AgentState) -> dict:
+        messages = [system_message(), *state["messages"]]
+        if toolbox is None:
+            return {"response": await llm.complete(messages), "tool_calls": []}
+        decision = await llm.complete_with_tools(messages, toolbox.definitions)
+        return {"response": decision.content, "tool_calls": decision.calls}
+
+    def route_decision(state: AgentState) -> str:
+        return "tools" if state.get("tool_calls") else END
+
+    async def execute_tools(state: AgentState) -> dict[str, list[str]]:
+        assert toolbox is not None
+        return {
+            "tool_results": [
+                toolbox.execute(call) for call in state.get("tool_calls", [])
+            ]
+        }
+
+    async def summarize_tools(state: AgentState) -> dict[str, str]:
+        messages = [
+            system_message(),
+            *state["messages"],
+            {
+                "role": "system",
+                "content": "Tool results:\n" + "\n".join(state["tool_results"]),
+            },
+        ]
         return {"response": await llm.complete(messages)}
 
     graph = StateGraph(AgentState)
-    graph.add_node("respond", respond)
-    graph.add_edge(START, "respond")
-    graph.add_edge("respond", END)
+    graph.add_node("decide", decide)
+    graph.add_node("tools", execute_tools)
+    graph.add_node("summarize", summarize_tools)
+    graph.add_edge(START, "decide")
+    graph.add_conditional_edges("decide", route_decision, {"tools": "tools", END: END})
+    graph.add_edge("tools", "summarize")
+    graph.add_edge("summarize", END)
     return graph.compile()
