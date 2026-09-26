@@ -4,9 +4,10 @@ import { api, Task } from "../../api/client";
 interface TasksProps {
   onOpenChat: () => void;
   onOpenNotes: () => void;
+  onOpenCalendar: () => void;
 }
 
-export function Tasks({ onOpenChat, onOpenNotes }: TasksProps) {
+export function Tasks({ onOpenChat, onOpenNotes, onOpenCalendar }: TasksProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
   const [dueAt, setDueAt] = useState("");
@@ -75,10 +76,11 @@ export function Tasks({ onOpenChat, onOpenNotes }: TasksProps) {
     <main className="shell">
       <aside>
         <div className="brand">Personal Assistant</div>
-        <div className="section-switcher three">
+        <div className="section-switcher four">
           <button onClick={onOpenChat}>Chat</button>
           <button onClick={onOpenNotes}>Notes</button>
           <button className="active">Tasks</button>
+          <button onClick={onOpenCalendar}>Calendar</button>
         </div>
       </aside>
       <section className="tasks-page">

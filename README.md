@@ -11,6 +11,7 @@ React, SQLite, and a small replaceable RAG layer.
 - PDF, text, and Markdown document uploads
 - Retrieved source citations in chat responses
 - Persistent tasks and reminders with LangGraph tool calling
+- Google Calendar OAuth, upcoming events, and agent calendar tools
 - Responsive React chat client
 - Optional API-key protection, request IDs, tests, CI, and deployment manifests
 
@@ -70,6 +71,9 @@ Open http://localhost:5173. API docs are at http://127.0.0.1:8000/docs.
 - `GET|POST /api/v1/tasks`
 - `PUT|DELETE /api/v1/tasks/{id}`
 - `POST /api/v1/tasks/{id}/complete`
+- `GET /api/v1/calendar/status`
+- `GET /api/v1/calendar/connect`
+- `GET|POST /api/v1/calendar/events`
 - `GET /health`
 
 Notes and uploaded documents are indexed automatically. The explicit `/index`
@@ -100,3 +104,25 @@ alembic upgrade head
 
 Secrets belong in `.env` or deployment environment variables and must never be
 committed.
+
+## Google Calendar setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the **Google Calendar API**.
+3. Configure the OAuth consent screen. For a testing app, add your Google
+   account as a test user.
+4. Create an **OAuth client ID** with application type **Web application**.
+5. Add this exact authorized redirect URI:
+   `http://127.0.0.1:8000/api/v1/calendar/callback`
+6. Add the credentials to `.env`:
+
+```env
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/api/v1/calendar/callback
+```
+
+Restart the backend, open the Calendar page, and select **Connect Google
+Calendar**. OAuth tokens are stored only in the local ignored SQLite database.
+For a multi-user production deployment, encrypt tokens at rest and associate
+them with authenticated users.

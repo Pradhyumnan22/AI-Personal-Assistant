@@ -38,6 +38,19 @@ export interface Task {
   updated_at: string;
 }
 
+export interface CalendarStatus {
+  configured: boolean;
+  connected: boolean;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  html_link?: string;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const isFormData = options?.body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
@@ -103,4 +116,27 @@ export const api = {
     request<Task>(`/api/v1/tasks/${id}/complete`, { method: "POST" }),
   deleteTask: (id: string) =>
     request<void>(`/api/v1/tasks/${id}`, { method: "DELETE" }),
+  calendarStatus: () =>
+    request<CalendarStatus>("/api/v1/calendar/status"),
+  calendarConnectUrl: () =>
+    request<{ authorization_url: string }>("/api/v1/calendar/connect"),
+  disconnectCalendar: () =>
+    request<void>("/api/v1/calendar/connection", { method: "DELETE" }),
+  calendarEvents: () =>
+    request<CalendarEvent[]>("/api/v1/calendar/events"),
+  createCalendarEvent: (
+    title: string,
+    start: string,
+    end?: string,
+    description?: string,
+  ) =>
+    request<CalendarEvent>("/api/v1/calendar/events", {
+      method: "POST",
+      body: JSON.stringify({
+        title,
+        start,
+        end: end || null,
+        description: description || null,
+      }),
+    }),
 };

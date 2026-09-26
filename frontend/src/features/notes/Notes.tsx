@@ -4,9 +4,10 @@ import { api, Note } from "../../api/client";
 interface NotesProps {
   onOpenChat: () => void;
   onOpenTasks: () => void;
+  onOpenCalendar: () => void;
 }
 
-export function Notes({ onOpenChat, onOpenTasks }: NotesProps) {
+export function Notes({ onOpenChat, onOpenTasks, onOpenCalendar }: NotesProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
   const [title, setTitle] = useState("");
@@ -114,10 +115,11 @@ export function Notes({ onOpenChat, onOpenTasks }: NotesProps) {
     <main className="shell">
       <aside>
         <div className="brand">Personal Assistant</div>
-        <div className="section-switcher three">
+        <div className="section-switcher four">
           <button onClick={onOpenChat}>Chat</button>
           <button className="active">Notes</button>
           <button onClick={onOpenTasks}>Tasks</button>
+          <button onClick={onOpenCalendar}>Calendar</button>
         </div>
         <button className="new-chat" onClick={newNote}>+ New note</button>
         <label className="upload-button">

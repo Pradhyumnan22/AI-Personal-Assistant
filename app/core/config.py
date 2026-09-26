@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     api_key: str | None = None
     max_context_messages: int = 20
+    frontend_url: str = "http://localhost:5173"
+
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+    google_redirect_uri: str = "http://127.0.0.1:8000/api/v1/calendar/callback"
 
     otel_exporter_otlp_endpoint: str | None = None
 

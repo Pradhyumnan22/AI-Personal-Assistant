@@ -4,9 +4,10 @@ import { api, Conversation, Message } from "../../api/client";
 interface ChatProps {
   onOpenNotes: () => void;
   onOpenTasks: () => void;
+  onOpenCalendar: () => void;
 }
 
-export function Chat({ onOpenNotes, onOpenTasks }: ChatProps) {
+export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversationId, setConversationId] = useState<string>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -62,10 +63,11 @@ export function Chat({ onOpenNotes, onOpenTasks }: ChatProps) {
     <main className="shell">
       <aside>
         <div className="brand">Personal Assistant</div>
-        <div className="section-switcher three">
+        <div className="section-switcher four">
           <button className="active">Chat</button>
           <button onClick={onOpenNotes}>Notes</button>
           <button onClick={onOpenTasks}>Tasks</button>
+          <button onClick={onOpenCalendar}>Calendar</button>
         </div>
         <button
           className="new-chat"

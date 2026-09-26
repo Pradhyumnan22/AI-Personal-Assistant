@@ -1,12 +1,11 @@
 """Minimal LangGraph assistant workflow."""
 
-from typing import TypedDict
+from typing import Protocol, TypedDict
 from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
 
 from app.llm import LLMClient, ToolCall
-from app.tools import TaskToolbox
 
 SYSTEM_PROMPT = (
     "You are a concise, reliable personal assistant. Use supplied context when "
@@ -21,7 +20,13 @@ class AgentState(TypedDict, total=False):
     tool_results: list[str]
 
 
-def build_assistant_graph(llm: LLMClient, toolbox: TaskToolbox | None = None):
+class AgentToolbox(Protocol):
+    definitions: list[dict]
+
+    def execute(self, call: ToolCall) -> str: ...
+
+
+def build_assistant_graph(llm: LLMClient, toolbox: AgentToolbox | None = None):
     def system_message() -> dict[str, str]:
         return {
             "role": "system",
@@ -29,7 +34,9 @@ def build_assistant_graph(llm: LLMClient, toolbox: TaskToolbox | None = None):
                 f"{SYSTEM_PROMPT}\nCurrent UTC time: "
                 f"{datetime.now(timezone.utc).isoformat()}. "
                 "Use task tools whenever the user asks to create, list, complete, "
-                "or delete tasks or reminders."
+                "or delete tasks or reminders. Use calendar tools for requests about "
+                "Google Calendar events; if Calendar is disconnected, explain that "
+                "the user must connect it from the Calendar page."
             ),
         }
 

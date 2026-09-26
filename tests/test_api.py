@@ -73,3 +73,10 @@ def test_task_crud(client):
 
     deleted = client.delete(f"/api/v1/tasks/{task_id}")
     assert deleted.status_code == 204
+
+
+def test_calendar_status(client):
+    response = client.get("/api/v1/calendar/status")
+
+    assert response.status_code == 200
+    assert response.json()["connected"] is False

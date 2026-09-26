@@ -80,3 +80,21 @@ class Task(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, onupdate=utc_now
     )
+
+
+class CalendarCredential(Base):
+    __tablename__ = "calendar_credentials"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default="primary")
+    access_token: Mapped[str] = mapped_column(Text)
+    refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    token_uri: Mapped[str] = mapped_column(
+        String(300), default="https://oauth2.googleapis.com/token"
+    )
+    scopes: Mapped[str] = mapped_column(Text)
+    expiry: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
