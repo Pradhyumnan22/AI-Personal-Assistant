@@ -5,6 +5,7 @@ import { Calendar } from "./features/calendar/Calendar";
 import { Notes } from "./features/notes/Notes";
 import { Tasks } from "./features/tasks/Tasks";
 import "./styles.css";
+import "./theme.css";
 
 function App() {
   const [page, setPage] = useState<"chat" | "notes" | "tasks" | "calendar">(

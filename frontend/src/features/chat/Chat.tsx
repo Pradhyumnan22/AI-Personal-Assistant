@@ -91,13 +91,32 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
         </nav>
       </aside>
       <section className="chat">
-        <header>
-          <h1>How can I help?</h1>
-          <p>Ask a question or work with your saved notes.</p>
+        <header className="page-heading">
+          <div>
+            <span className="eyebrow">AI workspace</span>
+            <h1>How can I help?</h1>
+            <p>Chat with your knowledge, tasks, and calendar.</p>
+          </div>
+          <span className="status-pill"><i /> Assistant online</span>
         </header>
         <div className="messages" aria-live="polite">
           {messages.length === 0 && (
-            <div className="empty">Start a conversation with your assistant.</div>
+            <div className="empty chat-empty">
+              <div className="assistant-mark">✦</div>
+              <h2>Your day, one conversation away.</h2>
+              <p>Ask a question, find a note, or plan what comes next.</p>
+              <div className="prompt-grid">
+                {[
+                  "What tasks do I have?",
+                  "Summarize my saved notes",
+                  "What's on my calendar?",
+                ].map((prompt) => (
+                  <button key={prompt} onClick={() => setInput(prompt)}>
+                    {prompt}<span>→</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           {messages.map((message, index) => (
             <article className={message.role} key={message.id ?? index}>
@@ -116,10 +135,14 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
               )}
             </article>
           ))}
-          {busy && <article className="assistant">Thinking…</article>}
+          {busy && (
+            <article className="assistant thinking">
+              <span /><span /><span />
+            </article>
+          )}
         </div>
         {error && <div className="error">{error}</div>}
-        <form onSubmit={submit}>
+        <form className="chat-composer" onSubmit={submit}>
           <textarea
             aria-label="Message"
             placeholder="Message your assistant…"
@@ -132,8 +155,11 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
               }
             }}
           />
-          <button disabled={busy || !input.trim()} type="submit">Send</button>
+          <button aria-label="Send message" disabled={busy || !input.trim()} type="submit">
+            Send <span>↑</span>
+          </button>
         </form>
+        <small className="composer-hint">Enter to send · Shift + Enter for a new line</small>
       </section>
     </main>
   );
