@@ -1,6 +1,15 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api, Conversation, Message } from "../../api/client";
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
+const demoConversation: Conversation = {
+  id: "portfolio-demo",
+  title: "Portfolio demo",
+  pinned: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 interface ChatProps {
   onOpenNotes: () => void;
   onOpenTasks: () => void;
@@ -8,15 +17,21 @@ interface ChatProps {
 }
 
 export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [conversationId, setConversationId] = useState<string>();
+  const [conversations, setConversations] = useState<Conversation[]>(
+    DEMO_MODE ? [demoConversation] : [],
+  );
+  const [conversationId, setConversationId] = useState<string | undefined>(
+    DEMO_MODE ? demoConversation.id : undefined,
+  );
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const refreshConversations = () =>
-    api.conversations().then(setConversations).catch(() => undefined);
+    DEMO_MODE
+      ? Promise.resolve()
+      : api.conversations().then(setConversations).catch(() => undefined);
 
   useEffect(() => {
     refreshConversations();
@@ -25,6 +40,10 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
   async function openConversation(id: string) {
     setConversationId(id);
     setError("");
+    if (DEMO_MODE) {
+      setMessages([]);
+      return;
+    }
     try {
       setMessages(await api.messages(id));
     } catch (reason) {
@@ -34,6 +53,14 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
 
   async function togglePin(conversation: Conversation) {
     setError("");
+    if (DEMO_MODE) {
+      setConversations((current) =>
+        current.map((item) =>
+          item.id === conversation.id ? { ...item, pinned: !item.pinned } : item,
+        ),
+      );
+      return;
+    }
     try {
       await api.pinConversation(conversation.id, !conversation.pinned);
       await refreshConversations();
@@ -47,6 +74,14 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
       return;
     }
     setError("");
+    if (DEMO_MODE) {
+      setConversations((current) =>
+        current.filter((item) => item.id !== conversation.id),
+      );
+      setConversationId(undefined);
+      setMessages([]);
+      return;
+    }
     try {
       await api.deleteConversation(conversation.id);
       if (conversation.id === conversationId) {
@@ -69,6 +104,20 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
     setError("");
     setMessages((current) => [...current, { role: "user", content: message }]);
     setBusy(true);
+    if (DEMO_MODE) {
+      window.setTimeout(() => {
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content:
+              "This public portfolio is running in demo mode, so no OpenAI credits are used. The full application supports LangGraph workflows, RAG over saved notes, tasks, calendar tools, and persistent conversations.",
+          },
+        ]);
+        setBusy(false);
+      }, 550);
+      return;
+    }
     try {
       const response = await api.chat(message, conversationId);
       setConversationId(response.conversation_id);
@@ -94,9 +143,9 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
         <div className="brand">Personal Assistant</div>
         <div className="section-switcher four">
           <button className="active">Chat</button>
-          <button onClick={onOpenNotes}>Notes</button>
-          <button onClick={onOpenTasks}>Tasks</button>
-          <button onClick={onOpenCalendar}>Calendar</button>
+          <button disabled={DEMO_MODE} onClick={onOpenNotes}>Notes</button>
+          <button disabled={DEMO_MODE} onClick={onOpenTasks}>Tasks</button>
+          <button disabled={DEMO_MODE} onClick={onOpenCalendar}>Calendar</button>
         </div>
         <button
           className="new-chat"
@@ -151,7 +200,9 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
             <h1>How can I help?</h1>
             <p>Chat with your knowledge, tasks, and calendar.</p>
           </div>
-          <span className="status-pill"><i /> Assistant online</span>
+          <span className={`status-pill ${DEMO_MODE ? "demo" : ""}`}>
+            <i /> {DEMO_MODE ? "Portfolio demo · no API usage" : "Assistant online"}
+          </span>
         </header>
         <div className="messages" aria-live="polite">
           {messages.length === 0 && (
