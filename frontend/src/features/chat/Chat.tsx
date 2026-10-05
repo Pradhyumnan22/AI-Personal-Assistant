@@ -32,6 +32,35 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
     }
   }
 
+  async function togglePin(conversation: Conversation) {
+    setError("");
+    try {
+      await api.pinConversation(conversation.id, !conversation.pinned);
+      await refreshConversations();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to update pin");
+    }
+  }
+
+  async function deleteConversation(conversation: Conversation) {
+    if (!window.confirm(`Delete "${conversation.title}"? This cannot be undone.`)) {
+      return;
+    }
+    setError("");
+    try {
+      await api.deleteConversation(conversation.id);
+      if (conversation.id === conversationId) {
+        setConversationId(undefined);
+        setMessages([]);
+      }
+      await refreshConversations();
+    } catch (reason) {
+      setError(
+        reason instanceof Error ? reason.message : "Unable to delete conversation",
+      );
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     const message = input.trim();
@@ -80,13 +109,38 @@ export function Chat({ onOpenNotes, onOpenTasks, onOpenCalendar }: ChatProps) {
         </button>
         <nav aria-label="Conversations">
           {conversations.map((conversation) => (
-            <button
-              className={conversation.id === conversationId ? "active" : ""}
+            <div
+              className={`conversation-row ${
+                conversation.id === conversationId ? "active" : ""
+              }`}
               key={conversation.id}
-              onClick={() => openConversation(conversation.id)}
             >
-              {conversation.title}
-            </button>
+              <button
+                className="conversation-open"
+                onClick={() => openConversation(conversation.id)}
+                title={conversation.title}
+              >
+                {conversation.pinned && <span className="pin-indicator">◆</span>}
+                <span>{conversation.title}</span>
+              </button>
+              <div className="conversation-actions">
+                <button
+                  aria-label={conversation.pinned ? "Unpin conversation" : "Pin conversation"}
+                  onClick={() => togglePin(conversation)}
+                  title={conversation.pinned ? "Unpin" : "Pin"}
+                >
+                  {conversation.pinned ? "◆" : "◇"}
+                </button>
+                <button
+                  aria-label="Delete conversation"
+                  className="delete-conversation"
+                  onClick={() => deleteConversation(conversation)}
+                  title="Delete"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
           ))}
         </nav>
       </aside>

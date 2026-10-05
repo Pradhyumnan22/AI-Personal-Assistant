@@ -34,7 +34,12 @@ class MessageResponse(BaseModel):
 class ConversationResponse(BaseModel):
     id: str
     title: str
+    pinned: bool
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ConversationPinRequest(BaseModel):
+    pinned: bool

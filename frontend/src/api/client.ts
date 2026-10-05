@@ -17,6 +17,7 @@ export interface Source {
 export interface Conversation {
   id: string;
   title: string;
+  pinned: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -72,6 +73,13 @@ export const api = {
   conversations: () => request<Conversation[]>("/api/v1/conversations"),
   messages: (id: string) =>
     request<Message[]>(`/api/v1/conversations/${id}/messages`),
+  pinConversation: (id: string, pinned: boolean) =>
+    request<Conversation>(`/api/v1/conversations/${id}/pin`, {
+      method: "PATCH",
+      body: JSON.stringify({ pinned }),
+    }),
+  deleteConversation: (id: string) =>
+    request<void>(`/api/v1/conversations/${id}`, { method: "DELETE" }),
   chat: (message: string, conversationId?: string) =>
     request<{ conversation_id: string; message: string; sources: Source[] }>("/api/v1/chat", {
       method: "POST",

@@ -24,8 +24,19 @@ class ConversationRepository:
         return self.session.get(Conversation, conversation_id)
 
     def list(self) -> list[Conversation]:
-        statement = select(Conversation).order_by(Conversation.updated_at.desc())
+        statement = select(Conversation).order_by(
+            Conversation.pinned.desc(), Conversation.updated_at.desc()
+        )
         return list(self.session.scalars(statement))
+
+    def set_pinned(self, conversation: Conversation, pinned: bool) -> Conversation:
+        conversation.pinned = pinned
+        self.session.commit()
+        return conversation
+
+    def delete(self, conversation: Conversation) -> None:
+        self.session.delete(conversation)
+        self.session.commit()
 
     def add_message(self, conversation_id: str, role: str, content: str) -> Message:
         message = Message(

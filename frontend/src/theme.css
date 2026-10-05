@@ -53,7 +53,7 @@ aside {
   font-family: "Manrope", sans-serif;
   font-size: 16px;
   font-weight: 800;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 48px 1fr;
   letter-spacing: -.02em;
   margin: 0 4px 30px;
   min-height: 40px;
@@ -61,20 +61,18 @@ aside {
 }
 
 .brand::before {
-  align-items: center;
-  background: linear-gradient(145deg, var(--accent-bright), #6351df);
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 13px;
-  box-shadow: 0 8px 24px rgba(124, 108, 242, .3);
-  color: white;
-  content: "✦";
-  display: flex;
-  font-size: 18px;
+  background-image: url("/logo.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 285%;
+  border: 1px solid rgba(255, 132, 68, .22);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(238, 72, 45, .2);
+  content: "";
   grid-row: 1 / span 2;
-  height: 36px;
-  justify-content: center;
+  height: 42px;
   margin-right: 11px;
-  width: 36px;
+  width: 42px;
 }
 
 .brand::after {
@@ -167,6 +165,60 @@ nav button {
   padding: 9px 11px;
 }
 nav button:hover, nav button.active { background: rgba(255,255,255,.04); color: #dce3ed; }
+.conversation-row {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 2px 4px 2px 0;
+}
+.conversation-row:hover, .conversation-row.active {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(148,163,184,.08);
+}
+.conversation-row .conversation-open {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #8896aa;
+  display: flex;
+  min-width: 0;
+  padding: 8px 9px;
+  width: 100%;
+}
+.conversation-row.active .conversation-open { color: #e0e6f0; }
+.conversation-open > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pin-indicator {
+  color: #ff7a49;
+  flex: 0 0 auto;
+  font-size: 8px;
+  margin-right: 7px;
+}
+.conversation-actions {
+  display: flex;
+  opacity: 0;
+  transition: opacity .18s;
+}
+.conversation-row:hover .conversation-actions,
+.conversation-row.active .conversation-actions,
+.conversation-row:focus-within .conversation-actions { opacity: 1; }
+.conversation-actions button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #69758a;
+  height: 25px;
+  padding: 0;
+  text-align: center;
+  width: 25px;
+}
+.conversation-actions button:hover { background: rgba(255,255,255,.06); color: #c3ccda; }
+.conversation-actions .delete-conversation:hover { color: var(--danger); }
 
 .chat, .notes-page, .tasks-page, .calendar-page {
   height: 100vh;

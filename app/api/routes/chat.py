@@ -2,13 +2,14 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.api.dependencies import DatabaseSession, get_chat_service
 from app.db.repositories import ConversationRepository
 from app.schemas.chat import (
     ChatRequest,
     ChatResponse,
+    ConversationPinRequest,
     ConversationResponse,
     MessageResponse,
     SourceResponse,
@@ -62,3 +63,32 @@ def list_messages(conversation_id: str, session: DatabaseSession):
     if repository.get(conversation_id) is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return repository.messages(conversation_id, limit=100)
+
+
+@router.patch(
+    "/conversations/{conversation_id}/pin",
+    response_model=ConversationResponse,
+)
+def pin_conversation(
+    conversation_id: str,
+    payload: ConversationPinRequest,
+    session: DatabaseSession,
+):
+    repository = ConversationRepository(session)
+    conversation = repository.get(conversation_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return repository.set_pinned(conversation, payload.pinned)
+
+
+@router.delete(
+    "/conversations/{conversation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_conversation(conversation_id: str, session: DatabaseSession) -> Response:
+    repository = ConversationRepository(session)
+    conversation = repository.get(conversation_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    repository.delete(conversation)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
