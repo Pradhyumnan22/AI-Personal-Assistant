@@ -25,6 +25,7 @@ button { cursor: pointer; }
   background: #2b2110;
   border: 1px solid #765b21;
   color: #f5ca68;
+  display: inline-flex;
 }
 .new-chat, nav button {
   background: transparent; border: 1px solid #33404e; border-radius: 10px;
