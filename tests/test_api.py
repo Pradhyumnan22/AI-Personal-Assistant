@@ -80,3 +80,16 @@ def test_calendar_status(client):
 
     assert response.status_code == 200
     assert response.json()["connected"] is False
+
+
+def test_cors_allows_conversation_pin_patch(client):
+    response = client.options(
+        "/api/v1/conversations/example/pin",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "PATCH",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "PATCH" in response.headers["access-control-allow-methods"]
